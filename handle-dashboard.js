@@ -158,4 +158,5 @@ savePlantBtn.addEventListener("click", () => {
   plantNotesField.parentElement.style.display = "block";
 
   updatePlantDetails(plantId, newName , newNotes);
+  window.location.reload();
 });

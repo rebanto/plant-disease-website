@@ -1,15 +1,19 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const supabaseUrl = "https://dxwtzgtaltpqpkokievh.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4d3R6Z3RhbHRwcXBrb2tpZXZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU1Nzg1MzUsImV4cCI6MjA1MTE1NDUzNX0.rnQ0Q487d-LeYys8lwe4sCUf6u6m6-KLwwB-5iCTP84";
+async function getSupabaseKeys() {
+  const response = await fetch("http://127.0.0.1:5000/get-keys");
+  return response.json();
+}
+
+const { supabase_url: supabaseUrl, supabase_key: supabaseKey } = await getSupabaseKeys();
+
 export const supabase = createClient(supabaseUrl, supabaseKey);
 export const user = await supabase.auth.getUser();
 
 // verifies loggedin user with session
 export function checkUser() {
   if (user.error != null) {
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   }
 }
 
@@ -60,7 +64,7 @@ export async function signOut() {
   if (error) {
     alert("Error signing out:", error.message);
   } else {
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   }
 }
 
