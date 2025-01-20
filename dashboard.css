@@ -1,0 +1,53 @@
+body {
+  background-color: lightgreen !important;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    width: 90%;
+    padding: 1em;
+  }
+}
+
+.main-content {
+  display: flex;
+  flex-grow: 1;
+  height: 100% !important;
+  justify-content: center;
+  margin: 0 auto;
+  width: 50%;
+  background-color: lightgreen;
+  z-index: 10;
+  flex-direction: column;
+}
+
+.header {
+  padding: 1em;
+}
+
+#logout-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+#plant-scans-container {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+#scans-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#scans-table th, #scans-table td {
+  padding: 8px;
+  text-align: left;
+}
+
+#edit-fields {
+  margin-bottom: 20px;
+}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plant Health Login</title>
+    <link rel="icon" type="image/x-icon" href="/images/logo.png">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        background-image: url("images/login_bg.jpeg");
+        background-size: cover;
+        background-position: center;
+        font-family: "Arial", sans-serif;
+        color: #fff;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .card {
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        padding: 30px;
+        width: 100%;
+        max-width: 400px;
+      }
+
+      h3 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: #2c6b1f;
+        text-align: center;
+      }
+
+      .form-label {
+        color: #333;
+      }
+
+      .form-control {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        padding: 15px;
+        font-size: 1rem;
+        margin-bottom: 20px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #85e085, #3c9a3c);
+        border: none;
+        padding: 12px 20px;
+        width: 100%;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        transition: background 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #3c9a3c, #85e085);
+      }
+
+      .alert {
+        display: none;
+        margin-top: 15px;
+        text-align: center;
+        font-size: 1rem;
+        padding: 10px;
+        background-color: #f8d7da;
+        color: #721c24;
+        border-radius: 5px;
+        border: 1px solid #f5c6cb;
+      }
+
+      .alert.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .toggle-btn {
+        text-align: center;
+        font-size: 1rem;
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h3 id="form-title">Login</h3>
+        <hr />
+        <label for="username" class="form-label">Email</label>
+        <input type="email" id="username" class="form-control mb-3" />
+        <label for="password" class="form-label">Password</label>
+        <input type="password" id="password" class="form-control mb-3" />
+        <button id="action-button" class="btn btn-primary w-100">Login</button>
+        <div id="message" class="alert alert-danger mt-3"></div>
+        <button id="toggle-form" class="btn btn-link w-100 mt-2">
+          Don't have an account? Sign up
+        </button>
+      </div>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <script type="module">
+      import {
+        signUpWithEmail,
+        signInWithEmail,
+        checkIfEmailExistsInDatabase,
+        addUserToDatabase,
+      } from "./supabase-utils.js";
+      import { gebi } from "./utils.js";
+
+      const formTitle = gebi("form-title");
+      const actionButton = gebi("action-button");
+      const toggleFormButton = gebi("toggle-form");
+      const messageBox = gebi("message");
+
+      let isSignUpMode = false;
+
+      toggleFormButton.addEventListener("click", () => {
+        isSignUpMode = !isSignUpMode;
+        formTitle.textContent = isSignUpMode ? "Sign Up" : "Login";
+        actionButton.textContent = isSignUpMode ? "Sign Up" : "Login";
+        toggleFormButton.textContent = isSignUpMode
+          ? "Already have an account? Login"
+          : "Don't have an account? Sign up";
+        messageBox.style.display = "none";
+      });
+
+      actionButton.addEventListener("click", async () => {
+        const email = gebi("username").value.trim();
+        const password = gebi("password").value.trim();
+
+        if (!email || !password) {
+          displayMessage("Please fill in both fields.", false);
+          return;
+        }
+
+        let response;
+        if (isSignUpMode) {
+          const emailExists = await checkIfEmailExistsInDatabase(email);
+          if (emailExists) {
+            displayMessage(
+              "Email already exists. Please log in instead.",
+              false
+            );
+            return;
+          }
+
+          response = await signUpWithEmail(email, password);
+
+          if (response.success) {
+            const addUserResponse = await addUserToDatabase(email, password);
+            displayMessage(addUserResponse.message, addUserResponse.success);
+          } else {
+            displayMessage(response.message, response.success);
+          }
+        } else {
+          response = await signInWithEmail(email, password);
+          displayMessage(response.message, response.success);
+
+          if (response.success) {
+            window.location.href = "dashboard.html";
+          }
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key == "Enter") {
+          event.preventDefault();
+          actionButton.click();
+        }
+      });
+
+      function displayMessage(message, isSuccess) {
+        messageBox.textContent = message;
+        messageBox.className = `alert ${
+          isSuccess ? "alert-success" : "alert-danger"
+        }`;
+        messageBox.style.display = "block";
+      }
+    </script>
+  </body>
+</html>
