@@ -15,11 +15,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
   </head>
+
   <body>
     <button class="btn btn-danger ms-auto" id="logout-btn">Log Out</button>
 
     <div class="main-content container mt-4">
-      <h1 class="header text-center mb-4">My Plants Dashboard</h1>
+      <h1 class="header text-center mb-4">Plantopia</h1>
       <div class="text-center mb-4">
         <button
           class="btn btn-primary"
@@ -28,6 +29,14 @@
         >
           Add New Plant
         </button>
+        <button
+          class="btn btn-secondary"
+          data-bs-toggle="modal"
+          data-bs-target="#arduinoInfoModal"
+          onclick="closeBotpressChat()"
+        >
+          View Arduino Info
+        </button>
       </div>
 
       <div
@@ -35,6 +44,40 @@
         class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4"
       >
         <!-- plants are placed here -->
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="arduinoInfoModal"
+      tabindex="-1"
+      aria-labelledby="arduinoInfoModalLabel"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-dialog modal-dialog-centered"
+        style="min-width: 80%; min-height: 80%"
+      >
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="arduinoInfoModalLabel">
+              Arduino Sensor Data
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <h3>Moisture and NPK Data</h3>
+            <p>To be implemented...</p>
+            <div id="arduino-data">
+              <!-- Data from Arduino here -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -66,16 +109,29 @@
           <div class="modal-body">
             <div class="row">
               <div class="col-md-6">
-                <div id="edit-fields" style="display: none;">
+                <div id="edit-fields" style="display: none">
                   <div class="mb-3">
-                    <label for="edit-plant-name" class="form-label">Edit Name</label>
-                    <input type="text" id="edit-plant-name" class="form-control" />
+                    <label for="edit-plant-name" class="form-label"
+                      >Edit Name</label
+                    >
+                    <input
+                      type="text"
+                      id="edit-plant-name"
+                      class="form-control"
+                    />
                   </div>
                   <div class="mb-3">
-                    <label for="edit-plant-notes" class="form-label">Edit Notes</label>
-                    <textarea id="edit-plant-notes" class="form-control"></textarea>
+                    <label for="edit-plant-notes" class="form-label"
+                      >Edit Notes</label
+                    >
+                    <textarea
+                      id="edit-plant-notes"
+                      class="form-control"
+                    ></textarea>
                   </div>
-                  <button id="save-plant-btn" class="btn btn-success">Save</button>
+                  <button id="save-plant-btn" class="btn btn-success">
+                    Save
+                  </button>
                 </div>
 
                 <p><strong>Name: </strong><span id="plant-name"></span></p>
@@ -92,7 +148,7 @@
                   <strong>Scan Streak:</strong>
                   <span id="plant-scan-streak"></span>
                 </p>
-                
+
                 <p>
                   <strong>Scans:</strong>
                   <span id="plant-scans">To be implemented</span>
@@ -213,8 +269,32 @@
     </div>
 
     <script>
+      async function fetchArduinoData() {
+        try {
+          const response = await fetch("http://127.0.0.1:5000/sensor-data");
+          const data = await response.json();
+          const arduinoDataDiv = document.getElementById("arduino-data");
+          arduinoDataDiv.innerHTML = `
+        <p><strong>Soil Moisture:</strong> ${data.soil_moisture}%</p>
+        <p><strong>Nitrogen (N):</strong> ${data.nitrogen} ppm</p>
+        <p><strong>Phosphorus (P):</strong> ${data.phosphorus} ppm</p>
+        <p><strong>Potassium (K):</strong> ${data.potassium} ppm</p>
+      `;
+        } catch (error) {
+          console.error("Error fetching Arduino data:", error);
+        }
+      }
+
+      document
+        .getElementById("arduinoInfoModal")
+        .addEventListener("show.bs.modal", fetchArduinoData);
+
       function onModalClose() {
         location.reload();
+      }
+
+      function closeBotpressChat() {
+        window.botpress.close();
       }
     </script>
 
