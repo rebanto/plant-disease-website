@@ -4,9 +4,191 @@ import {
   addPlant,
   deletePlant,
   getUserId,
-  getDiseaseTips,
-  updatePlantDetails
+  updatePlantDetails,
+  fetchData,
+  sendData,
 } from "./supabase-utils.js";
+
+displayAllData();
+const socket = io("http://127.0.0.1:5000");
+const userID = await getUserId();
+
+let charts = {};
+
+async function displayAllData() {
+  const userID = await getUserId();
+  const data = await fetchData(userID);
+  console.log("Data:", data);
+
+  const labels = data.map((entry) => entry.datetime);
+  const soilMoisture = data.map((entry) => entry.soil_moisture);
+  const temperature = data.map((entry) => entry.temperature);
+  const humidity = data.map((entry) => entry.humidity);
+  const nitrogen = data.map((entry) => entry.nitrogen);
+  const phosphorus = data.map((entry) => entry.phosphorus);
+  const potassium = data.map((entry) => entry.potassium);
+  const ph = data.map((entry) => entry.ph);
+
+  const ctxMoisture = document.getElementById("moistureChart").getContext("2d");
+  const ctxTemp = document.getElementById("tempChart").getContext("2d");
+  const ctxHumidity = document.getElementById("humidityChart").getContext("2d");
+  const ctxNutrients = document
+    .getElementById("nutrientsChart")
+    .getContext("2d");
+  const ctxPH = document.getElementById("phChart").getContext("2d");
+
+  function createChart(ctx, label, data, color, type = "line") {
+    return new Chart(ctx, {
+      type,
+      data: {
+        labels,
+        datasets: [
+          {
+            label,
+            data,
+            borderColor: color,
+            backgroundColor: color + "80",
+            fill: true,
+            tension: 0.4,
+          },
+        ],
+      },
+      options: { responsive: true, animation: { duration: 1000 } },
+    });
+  }
+
+  charts.moistureChart = createChart(
+    ctxMoisture,
+    "Soil Moisture (%)",
+    soilMoisture,
+    "#0000FF"
+  );
+  charts.tempChart = createChart(
+    ctxTemp,
+    "Temperature (°C)",
+    temperature,
+    "#FF0000"
+  );
+  charts.humidityChart = createChart(
+    ctxHumidity,
+    "Humidity (%)",
+    humidity,
+    "#00FF00"
+  );
+  charts.phChart = createChart(ctxPH, "PH", ph, "#FFA500");
+
+  charts.nutrientsChart = new Chart(ctxNutrients, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Nitrogen (N)",
+          data: nitrogen,
+          backgroundColor: "rgba(255, 165, 0, 0.6)",
+        },
+        {
+          label: "Phosphorus (P)",
+          data: phosphorus,
+          backgroundColor: "rgba(75, 0, 130, 0.6)",
+        },
+        {
+          label: "Potassium (K)",
+          data: potassium,
+          backgroundColor: "rgba(255, 0, 255, 0.6)",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1000 },
+      scales: { y: { beginAtZero: true } },
+    },
+  });
+
+  document.querySelectorAll(".chart").forEach((canvas) => {
+    canvas.style.display = "none";
+  });
+
+  document.getElementById("moistureChart").style.display = "block";
+}
+
+socket.on("new_data", (data) => {
+  console.log("Received Arduino data:", data);
+
+  sendData(
+    userID,
+    data.datetime,
+    data.nitrogen,
+    data.phosphorus,
+    data.potassium,
+    data.soil_moisture,
+    data.temperature,
+    data.humidity,
+    data.ph
+  );
+
+  const newData = {
+    datetime: data.datetime,
+    soil_moisture: data.soil_moisture,
+    temperature: data.temperature,
+    humidity: data.humidity,
+    nitrogen: data.nitrogen,
+    phosphorus: data.phosphorus,
+    potassium: data.potassium,
+    ph: data.ph,
+  };
+
+  updateChartData(newData);
+});
+
+function updateChartData(newData) {
+  const labels = charts.moistureChart.data.labels;
+  if (labels.length > 20) {
+    labels.shift();
+  }
+  labels.push(newData.datetime);
+
+  updateChartDataset(charts.moistureChart, newData.soil_moisture);
+  updateChartDataset(charts.tempChart, newData.temperature);
+  updateChartDataset(charts.humidityChart, newData.humidity);
+  updateChartDataset(
+    charts.nutrientsChart,
+    newData.nitrogen,
+    newData.phosphorus,
+    newData.potassium
+  );
+  updateChartDataset(charts.phChart, newData.ph);
+
+  charts.moistureChart.update();
+  charts.tempChart.update();
+  charts.humidityChart.update();
+  charts.nutrientsChart.update();
+  charts.phChart.update();
+}
+
+function updateChartDataset(chart, ...data) {
+  const datasets = chart.data.datasets;
+  if (datasets[0].data.length > 20) {
+    datasets.forEach((dataset) => dataset.data.shift());
+  }
+
+  data.forEach((datum, index) => {
+    datasets[index].data.push(datum);
+  });
+}
+
+window.switchGraph = function () {
+  const selectedGraph = document.getElementById("graphSelector").value;
+
+  document.querySelectorAll(".chart").forEach((canvas) => {
+    canvas.style.display = "none";
+  });
+
+  document.getElementById(selectedGraph).style.display = "block";
+};
+
+window.onload = displayAllData;
 
 let plantId = null;
 
@@ -157,6 +339,8 @@ savePlantBtn.addEventListener("click", () => {
   plantNameField.parentElement.style.display = "block";
   plantNotesField.parentElement.style.display = "block";
 
-  updatePlantDetails(plantId, newName , newNotes);
+  updatePlantDetails(plantId, newName, newNotes);
   window.location.reload();
 });
+
+window.onload = displayAllData;

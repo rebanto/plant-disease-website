@@ -5,7 +5,8 @@ async function getSupabaseKeys() {
   return response.json();
 }
 
-const { supabase_url: supabaseUrl, supabase_key: supabaseKey } = await getSupabaseKeys();
+const { supabase_url: supabaseUrl, supabase_key: supabaseKey } =
+  await getSupabaseKeys();
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 export const user = await supabase.auth.getUser();
@@ -180,4 +181,50 @@ export async function updatePlantDetails(plantId, name, notes) {
     .from("plants")
     .update({ name, notes })
     .eq("id", plantId);
+}
+
+export async function sendData(
+  user_id,
+  datetime,
+  nitrogen,
+  phosphorus,
+  potassium,
+  soilMoisture,
+  temperature,
+  humidity,
+  ph
+) {
+  const data = {
+    user_id: user_id,
+    datetime: datetime,
+    nitrogen: nitrogen,
+    phosphorus: phosphorus,
+    potassium: potassium,
+    soil_moisture: soilMoisture,
+    temperature: temperature,
+    humidity: humidity,
+    ph: ph,
+  };
+
+  const { data: insertedData, error } = await supabase
+    .from("sensor_data")
+    .insert([data]);
+
+  if (error) {
+    console.error("Error inserting data:", error);
+    return;
+  }
+}
+
+export async function fetchData(user_id) {
+  const { data, error } = await supabase
+    .from("sensor_data")
+    .select("*")
+    .eq("user_id", user_id);
+
+  if (error) {
+    console.error("Error fetching data:", error);
+    return;
+  }
+  return data;
 }

@@ -14,6 +14,9 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="handle-dashboard.js" type="module"></script>
   </head>
 
   <body>
@@ -71,10 +74,41 @@
             ></button>
           </div>
           <div class="modal-body">
-            <h3>Moisture and NPK Data</h3>
-            <p>To be implemented...</p>
+            <div>
+              <select id="graphSelector" onchange="switchGraph()">
+                <option value="moistureChart">Soil Moisture</option>
+                <option value="tempChart">Temperature</option>
+                <option value="humidityChart">Humidity</option>
+                <option value="nutrientsChart">Nutrients</option>
+                <option value="phChart">PH</option>
+              </select>
+            </div>
             <div id="arduino-data">
-              <!-- Data from Arduino here -->
+              <canvas
+                id="moistureChart"
+                class="chart"
+                style="display: none"
+              ></canvas>
+              <canvas
+                id="tempChart"
+                class="chart"
+                style="display: none"
+              ></canvas>
+              <canvas
+                id="humidityChart"
+                class="chart"
+                style="display: none"
+              ></canvas>
+              <canvas
+                id="nutrientsChart"
+                class="chart"
+                style="display: none"
+              ></canvas>
+              <canvas
+                id="phChart"
+                class="chart"
+                style="display: none"
+              ></canvas>
             </div>
           </div>
         </div>
@@ -297,8 +331,6 @@
         window.botpress.close();
       }
     </script>
-
-    <script src="handle-dashboard.js" type="module"></script>
 
     <script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js"></script>
     <script src="https://files.bpcontent.cloud/2025/01/06/18/20250106183956-HKSSYYXP.js"></script>
