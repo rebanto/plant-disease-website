@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
 import os, json, time, random
+from datetime import datetime
 
 load_dotenv()
 
@@ -28,21 +29,23 @@ def receive_sensor_data():
         sensor_value = data["sensor_value"]
         parts = sensor_value.split("|")
         
-        if len(parts) != 9:
+        if len(parts) != 8:
             return jsonify({"error": "Incorrect sensor value format"}), 400
 
-        date_str = parts[0]
-        time_str = parts[1]
-        nitrogen = float(parts[2])
-        phosphorus = float(parts[3])
-        potassium = float(parts[4])
-        soil_moisture = float(parts[5])
-        temperature = float(parts[6])
-        humidity = float(parts[7])
-        ph = float(parts[8])
+        unix = parts[0]
+        nitrogen = float(parts[1])
+        phosphorus = float(parts[2])
+        potassium = float(parts[3])
+        soil_moisture = float(parts[4])
+        temperature = float(parts[5])
+        humidity = float(parts[6])
+        ph = float(parts[7])
 
+        datetime_object = datetime.fromtimestamp(int(unix))
+        formatted_datetime = datetime_object.strftime("%Y-%m-%d %H:%M:%S")
+        
         formatted_data = {
-            "datetime": f"{date_str} {time_str}",
+            "datetime": formatted_datetime,
             "nitrogen": nitrogen,
             "phosphorus": phosphorus,
             "potassium": potassium,
