@@ -303,25 +303,7 @@
     </div>
 
     <script>
-      async function fetchArduinoData() {
-        try {
-          const response = await fetch("http://127.0.0.1:5000/sensor-data");
-          const data = await response.json();
-          const arduinoDataDiv = document.getElementById("arduino-data");
-          arduinoDataDiv.innerHTML = `
-        <p><strong>Soil Moisture:</strong> ${data.soil_moisture}%</p>
-        <p><strong>Nitrogen (N):</strong> ${data.nitrogen} ppm</p>
-        <p><strong>Phosphorus (P):</strong> ${data.phosphorus} ppm</p>
-        <p><strong>Potassium (K):</strong> ${data.potassium} ppm</p>
-      `;
-        } catch (error) {
-          console.error("Error fetching Arduino data:", error);
-        }
-      }
 
-      document
-        .getElementById("arduinoInfoModal")
-        .addEventListener("show.bs.modal", fetchArduinoData);
 
       function onModalClose() {
         location.reload();
