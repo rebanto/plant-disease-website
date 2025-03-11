@@ -320,7 +320,6 @@ window.showPlantDetails = (id) => {
       plant.diseases_detected || "None";
     document.getElementById("plant-scan-streak").innerText = plant.streak || 0;
     document.getElementById("plant-notes").innerText = plant.notes || "None";
-    document.getElementById("plant-scans").innerText = "To be implemented";
 
     const plantImage = plant.latest_scan_image || "images/plant.png";
     document.getElementById("plant-image").src = plantImage;
