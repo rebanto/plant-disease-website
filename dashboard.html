@@ -1,3 +1,5 @@
+
+<!-- This is the dashboard (main) page -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -12,19 +14,31 @@
       integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
       crossorigin="anonymous"
     />
+
+    <!-- Load tensorflow for handling machine learning model -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+
+    <!-- Load the Image Classifier model from Teachable Machine-->
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+    <!-- Load websocket for real-time updates between frontend, Flask server, and database (Supabase) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+
+    <!-- Load Chart.js for displaying sensor data -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Load main script for handling dashboard logic-->
     <script src="handle-dashboard.js" type="module"></script>
   </head>
 
   <body>
+    <!-- Log out button-->
     <button class="btn btn-danger ms-auto" id="logout-btn">Log Out</button>
-
     <div class="main-content container mt-4">
       <h1 class="header text-center mb-4">Plantopia</h1>
       <div class="text-center mb-4">
+
+        <!-- Top Buttons for adding plants and viewing arduino data -->
         <button
           class="btn btn-primary"
           data-bs-toggle="modal"
@@ -46,10 +60,11 @@
         id="plants-container"
         class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4"
       >
-        <!-- plants are placed here -->
+        <!-- plants are placed here, populated by code in handle-dashboard.js -->
       </div>
     </div>
 
+    <!-- modal for displaying arduino data -->
     <div
       class="modal fade"
       id="arduinoInfoModal"
@@ -75,6 +90,7 @@
           </div>
           <div class="modal-body">
             <div>
+              <!-- dropdown for selecting which graph to display -->
               <select id="graphSelector" onchange="switchGraph()">
                 <option value="moistureChart">Soil Moisture</option>
                 <option value="tempChart">Temperature</option>
@@ -115,6 +131,7 @@
       </div>
     </div>
 
+    <!-- modal for displaying plant details -->
     <div
       class="modal fade"
       id="plantModal"
@@ -175,17 +192,13 @@
                   <span id="plant-last-scanned"></span>
                 </p>
                 <p>
+                  <!-- diseases detected by Machine Learning model -->
                   <strong>Diseases Detected:</strong>
                   <span id="plant-diseases-detected"></span>
                 </p>
                 <p>
                   <strong>Scan Streak:</strong>
                   <span id="plant-scan-streak"></span>
-                </p>
-
-                <p>
-                  <strong>Scans:</strong>
-                  <span id="plant-scans">To be implemented</span>
                 </p>
               </div>
 
@@ -197,6 +210,7 @@
                   alt="Plant Image"
                 />
                 <br />
+                <!-- Button for scanning plant leave, logic for machine learning model in scan-logic.js -->
                 <button
                   id="scan-now-btn"
                   class="btn btn-primary"
@@ -216,6 +230,7 @@
       </div>
     </div>
 
+    <!-- modal for adding new plant -->
     <div
       class="modal fade"
       id="addPlantModal"
@@ -265,6 +280,7 @@
       </div>
     </div>
 
+    <!-- modal for scanning plant leaves -->
     <div
       class="modal fade"
       id="scanPlantModal"
@@ -304,21 +320,25 @@
 
     <script>
 
-
+      // function to close the modal and reload the page
       function onModalClose() {
         location.reload();
       }
 
+      // function to close the botpress chat
       function closeBotpressChat() {
         window.botpress.close();
       }
     </script>
 
+    <!-- load Botpress chatbot -->
     <script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js"></script>
     <script src="https://files.bpcontent.cloud/2025/01/06/18/20250106183956-HKSSYYXP.js"></script>
 
+    <!-- load script for handling Machine Learning Leaf scanning logic -->
     <script type="module" src="scan-logic.js"></script>
 
+    <!-- load script for boostrap and popper (used for enhacing looks of website) -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
   </body>

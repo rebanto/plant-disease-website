@@ -1,10 +1,25 @@
+<!--
+Idea of product: Crops/Plant assisstant, can be used by farmers and everyday kitchen garden owners
+
+Outline of product:
+Software: User-based (login) Web application that allows users to add special care plants, track details about the plants
+    Outstanding features - Machine Learning Model that detects plant diseases and offers care tips to take care of plant
+                         - Data visualization through graphs and charts for soil/plant data through Arduino hardware
+
+Hardware: Arduino system with NPK, Moisture, Humidity, pH, temperature, and humidity sensors.
+        - Built in a compact case that is easy to use with pins
+        - Device to be put near soil
+        - communicates with software to display arduino sensor data to show the user.
+-->
+
+<!-- This is the login page (entry point into website) -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Plant Health Login</title>
-    <link rel="icon" type="image/x-icon" href="/images/logo.png">
+    <link rel="icon" type="image/x-icon" href="/images/logo.png" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -12,6 +27,8 @@
       crossorigin="anonymous"
     />
     <style>
+      /* Styles for the login page */
+
       body {
         background-image: url("images/login_bg.jpeg");
         background-size: cover;
@@ -92,6 +109,8 @@
     </style>
   </head>
   <body>
+    <!-- Login page -->
+
     <div class="container">
       <div class="card">
         <h3 id="form-title">Login</h3>
@@ -107,27 +126,32 @@
         </button>
       </div>
     </div>
+
+    <!-- importing boostrap -->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
       crossorigin="anonymous"
     ></script>
+
+    <!-- handling login and signup login by using utility functions from other js files -->
     <script type="module">
+      // importing database utility functions to sign in or sign up
       import {
         signUpWithEmail,
         signInWithEmail,
         checkIfEmailExistsInDatabase,
         addUserToDatabase,
       } from "./supabase-utils.js";
-      import { gebi } from "./utils.js";
+      
+      const formTitle = document.getElementById("form-title");
+      const actionButton = document.getElementById("action-button");
+      const toggleFormButton = document.getElementById("toggle-form");
+      const messageBox = document.getElementById("message");
 
-      const formTitle = gebi("form-title");
-      const actionButton = gebi("action-button");
-      const toggleFormButton = gebi("toggle-form");
-      const messageBox = gebi("message");
+      let isSignUpMode = false; // toggle between login and signup
 
-      let isSignUpMode = false;
-
+      // toggle between login and signup
       toggleFormButton.addEventListener("click", () => {
         isSignUpMode = !isSignUpMode;
         formTitle.textContent = isSignUpMode ? "Sign Up" : "Login";
@@ -138,10 +162,13 @@
         messageBox.style.display = "none";
       });
 
+      // login or signup logic
       actionButton.addEventListener("click", async () => {
-        const email = gebi("username").value.trim();
-        const password = gebi("password").value.trim();
+        const email = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        console.log(email);
 
+        // check if email and password are not empty
         if (!email || !password) {
           displayMessage("Please fill in both fields.", false);
           return;
@@ -149,7 +176,10 @@
 
         let response;
         if (isSignUpMode) {
-          const emailExists = await checkIfEmailExistsInDatabase(email);
+          // if user is singning up
+
+          // check if email already exists in the database
+          const emailExists = await checkIfEmailExistsInDatabase(email); // calling utility function
           if (emailExists) {
             displayMessage(
               "Email already exists. Please log in instead.",
@@ -158,24 +188,30 @@
             return;
           }
 
-          response = await signUpWithEmail(email, password);
+          response = await signUpWithEmail(email, password); // calling utility function for sign up
 
+          // display message based on response
           if (response.success) {
-            const addUserResponse = await addUserToDatabase(email, password);
-            displayMessage(addUserResponse.message, addUserResponse.success);
+            // if sign up is successful
+            const addUserResponse = await addUserToDatabase(email, password); // calling utility function to add user to database
+            displayMessage(addUserResponse.message, addUserResponse.success); // display success message
           } else {
-            displayMessage(response.message, response.success);
+            // if sign up is not successful
+            displayMessage(response.message, response.success); // display error message
           }
         } else {
-          response = await signInWithEmail(email, password);
-          displayMessage(response.message, response.success);
+          // if user is logging in
+          response = await signInWithEmail(email, password); // calling utility function for sign in
+          displayMessage(response.message, response.success); // display message based on response
 
           if (response.success) {
-            window.location.href = "dashboard.html";
+            // if sign in is successful
+            window.location.href = "dashboard.html"; // redirect to dashboard
           }
         }
       });
 
+      // handle enter key press to sign in / sign up instead of clicking the button
       document.addEventListener("keydown", (event) => {
         if (event.key == "Enter") {
           event.preventDefault();
@@ -183,6 +219,7 @@
         }
       });
 
+      // display message on the screen for success/error
       function displayMessage(message, isSuccess) {
         messageBox.textContent = message;
         messageBox.className = `alert ${
